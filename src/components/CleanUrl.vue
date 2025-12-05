@@ -3,11 +3,14 @@ import { ref, computed } from 'vue';
 import type { ParsedUTMParams } from '../lib/types';
 import { buildCleanUrl } from '../lib/fixer';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   originalUrl: string;
   params: ParsedUTMParams;
   status: 'success' | 'warning' | 'error';
-}>();
+  compact?: boolean;
+}>(), {
+  compact: false,
+});
 
 const copied = ref(false);
 
@@ -61,69 +64,71 @@ async function copyUrl() {
 </script>
 
 <template>
-  <div v-if="cleanUrl" class="space-y-3">
-    <h3 class="text-sm font-medium text-zinc-400 uppercase tracking-wide">
-      Clean URL
-    </h3>
-    <div
-      :class="[
-        'rounded-lg border overflow-hidden',
-        statusStyles.border,
-        statusStyles.bg,
-      ]"
-    >
-      <!-- URL Display -->
-      <div class="p-4">
-        <div class="flex items-start gap-3">
-          <span class="shrink-0 mt-0.5">{{ statusStyles.icon }}</span>
-          <div class="flex-1 min-w-0">
-            <p
-              class="font-mono text-sm break-all text-zinc-200 leading-relaxed"
-            >
-              {{ cleanUrl }}
-            </p>
-          </div>
+  <div 
+    v-if="cleanUrl" 
+    :class="[
+      'rounded-lg border overflow-hidden h-full flex flex-col',
+      statusStyles.border,
+      statusStyles.bg,
+    ]"
+  >
+    <!-- URL Display -->
+    <div :class="compact ? 'p-3 flex-1' : 'p-4'">
+      <div class="flex items-start gap-2">
+        <span :class="['shrink-0', compact ? 'text-sm' : 'mt-0.5']">{{ statusStyles.icon }}</span>
+        <div class="flex-1 min-w-0">
+          <p
+            :class="[
+              'font-mono break-all text-zinc-200 leading-relaxed overflow-hidden',
+              compact ? 'text-xs' : 'text-sm',
+            ]"
+            style="word-break: break-all; overflow-wrap: anywhere;"
+          >
+            {{ cleanUrl }}
+          </p>
         </div>
       </div>
+    </div>
+    
+    <!-- Copy Button Bar -->
+    <div
+      :class="[
+        'flex items-center justify-between border-t mt-auto',
+        compact ? 'px-3 py-2' : 'px-4 py-2.5',
+        statusStyles.highlight,
+        statusStyles.border,
+      ]"
+    >
+      <span :class="['font-medium', statusStyles.text, compact ? 'text-[10px]' : 'text-xs']">
+        {{ status === 'success' ? 'Ready to use' : status === 'warning' ? 'Usable' : 'Fix errors first' }}
+      </span>
       
-      <!-- Copy Button Bar -->
-      <div
+      <button
+        @click="copyUrl"
+        :disabled="status === 'error'"
         :class="[
-          'flex items-center justify-between px-4 py-2.5 border-t',
-          statusStyles.highlight,
-          statusStyles.border,
+          'inline-flex items-center gap-1.5 rounded-md font-medium transition-all duration-200',
+          compact ? 'px-2 py-1 text-[11px]' : 'px-3 py-1.5 text-xs',
+          status === 'error'
+            ? 'bg-surface-600 text-zinc-500 cursor-not-allowed'
+            : copied
+              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+              : 'bg-surface-600 hover:bg-surface-500 text-zinc-200 border border-surface-500',
         ]"
       >
-        <span :class="['text-xs font-medium', statusStyles.text]">
-          {{ status === 'success' ? 'Ready to use' : status === 'warning' ? 'Usable with warnings' : 'Fix errors first' }}
-        </span>
-        
-        <button
-          @click="copyUrl"
-          :disabled="status === 'error'"
-          :class="[
-            'inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200',
-            status === 'error'
-              ? 'bg-surface-600 text-zinc-500 cursor-not-allowed'
-              : copied
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                : 'bg-surface-600 hover:bg-surface-500 text-zinc-200 border border-surface-500',
-          ]"
-        >
-          <template v-if="copied">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Copied!
-          </template>
-          <template v-else>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-            Copy URL
-          </template>
-        </button>
-      </div>
+        <template v-if="copied">
+          <svg :class="compact ? 'w-3 h-3' : 'w-4 h-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span v-if="!compact">Copied!</span>
+        </template>
+        <template v-else>
+          <svg :class="compact ? 'w-3 h-3' : 'w-4 h-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          Copy
+        </template>
+      </button>
     </div>
   </div>
 </template>

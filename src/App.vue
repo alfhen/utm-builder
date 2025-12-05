@@ -176,84 +176,113 @@ function handleUpdateParam(key: UTMParamKey, value: string) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-900 py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-2xl mx-auto">
-      <!-- Header -->
-      <header class="text-center mb-10">
-        <h1
-          class="text-4xl sm:text-5xl font-bold tracking-tight mb-4"
-          style="
-            font-family: 'Syne', sans-serif;
-            background: linear-gradient(135deg, #00d4ff 0%, #c4ff00 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-          "
-        >
-          UTM Builder
-        </h1>
-        <p class="text-zinc-400 max-w-lg mx-auto">
-          Paste your URL, fix issues with one click, and get properly formatted UTM parameters.
-        </p>
-      </header>
+  <div class="min-h-screen bg-surface-900 py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <header class="text-center mb-6 lg:mb-8">
+      <h1
+        class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-2"
+        style="
+          font-family: 'Syne', sans-serif;
+          background: linear-gradient(135deg, #00d4ff 0%, #c4ff00 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        "
+      >
+        UTM Builder
+      </h1>
+      <p class="text-zinc-400 text-sm sm:text-base max-w-lg mx-auto">
+        Paste your URL, fix issues with one click, and get properly formatted UTM parameters.
+      </p>
+    </header>
 
-      <!-- Main Card -->
-      <main class="bg-surface-800 rounded-2xl border border-surface-600 p-6 sm:p-8 shadow-2xl">
-        <div class="space-y-6">
-          <!-- URL Input -->
-          <UrlInput v-model="urlInput" @paste="handlePaste" @input="handleInput" />
+    <!-- Main Content - Two Column Layout on Large Screens -->
+    <div class="max-w-7xl mx-auto overflow-hidden">
+      <div class="flex flex-col lg:flex-row lg:items-start gap-6">
+        <!-- Left Panel: Input & Controls -->
+        <div class="w-full lg:w-[380px] lg:flex-shrink-0">
+          <div class="bg-surface-800 rounded-2xl border border-surface-600 p-5 sm:p-6 shadow-2xl lg:sticky lg:top-6 h-full">
+            <div class="space-y-5">
+              <!-- URL Input -->
+              <UrlInput v-model="urlInput" @paste="handlePaste" @input="handleInput" />
 
-          <!-- Channel Selector -->
-          <ChannelSelector
-            v-model="selectedChannelId"
-            :visible="showChannelSelector"
-            @update:model-value="handleChannelChange"
-          />
+              <!-- Channel Selector -->
+              <ChannelSelector
+                v-model="selectedChannelId"
+                :visible="showChannelSelector"
+                @update:model-value="handleChannelChange"
+              />
 
-          <!-- Paid/Organic Toggle -->
-          <Transition
-            enter-active-class="transition duration-200 ease-out"
-            enter-from-class="opacity-0 -translate-y-2"
-            enter-to-class="opacity-100 translate-y-0"
-            leave-active-class="transition duration-150 ease-in"
-            leave-from-class="opacity-100 translate-y-0"
-            leave-to-class="opacity-0 -translate-y-2"
-          >
-            <TrafficTypeToggle
-              v-if="showTrafficToggle"
-              :is-paid="currentTrafficType === 'paid' || currentTrafficType === 'paid_search'"
-              @update:is-paid="handleTrafficTypeChange"
-            />
-          </Transition>
-        </div>
+              <!-- Paid/Organic Toggle -->
+              <Transition
+                enter-active-class="transition duration-200 ease-out"
+                enter-from-class="opacity-0 -translate-y-2"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition duration-150 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 -translate-y-2"
+              >
+                <TrafficTypeToggle
+                  v-if="showTrafficToggle"
+                  :is-paid="currentTrafficType === 'paid' || currentTrafficType === 'paid_search'"
+                  @update:is-paid="handleTrafficTypeChange"
+                />
+              </Transition>
+            </div>
 
-        <!-- Parse Error -->
-        <div
-          v-if="parseError"
-          class="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg animate-fade-in"
-        >
-          <div class="flex items-start gap-3">
-            <span class="text-lg">❌</span>
-            <p class="text-red-300 text-sm">{{ parseError }}</p>
+            <!-- Parse Error (in left panel) -->
+            <div
+              v-if="parseError"
+              class="mt-5 p-4 bg-red-500/10 border border-red-500/30 rounded-lg animate-fade-in"
+            >
+              <div class="flex items-start gap-3">
+                <span class="text-lg">❌</span>
+                <p class="text-red-300 text-sm">{{ parseError }}</p>
+              </div>
+            </div>
+
+            <!-- Empty State for Right Panel -->
+            <div v-if="!validationResult && !parseError && hasValidated" class="mt-5 p-4 bg-surface-700/50 rounded-lg text-center">
+              <p class="text-zinc-500 text-sm">Enter a URL to see validation results</p>
+            </div>
           </div>
         </div>
 
-        <!-- Validation Results -->
-        <div v-if="validationResult" class="mt-8 pt-8 border-t border-surface-600">
-          <ValidationResults
-            :result="validationResult"
-            :original-url="urlInput"
-            @fix="handleFix"
-            @fix-all="handleFixAll"
-            @update-param="handleUpdateParam"
-          />
-        </div>
-      </main>
+        <!-- Right Panel: Validation Results -->
+        <div class="flex-1 min-w-0 overflow-hidden">
+          <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 translate-y-4 lg:translate-y-0 lg:translate-x-4"
+            enter-to-class="opacity-100 translate-y-0 lg:translate-x-0"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+          >
+            <main v-if="validationResult" class="bg-surface-800 rounded-2xl border border-surface-600 p-5 sm:p-6 shadow-2xl h-full">
+              <ValidationResults
+                :result="validationResult"
+                :original-url="urlInput"
+                @fix="handleFix"
+                @fix-all="handleFixAll"
+                @update-param="handleUpdateParam"
+              />
+            </main>
+          </Transition>
 
-      <!-- Footer -->
-      <footer class="mt-8 text-center text-zinc-500 text-sm">
-        <p>Build consistent UTM parameters for your marketing campaigns.</p>
-      </footer>
+          <!-- Placeholder when no results -->
+          <div v-if="!validationResult && !hasValidated" class="hidden lg:flex items-center justify-center h-64 bg-surface-800/50 rounded-2xl border border-surface-600/50 border-dashed">
+            <div class="text-center">
+              <div class="text-4xl mb-3 opacity-30">🔗</div>
+              <p class="text-zinc-500">Paste a URL to get started</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center text-zinc-500 text-sm">
+      <p>Build consistent UTM parameters for your marketing campaigns.</p>
+    </footer>
   </div>
 </template>
