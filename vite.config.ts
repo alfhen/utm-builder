@@ -6,5 +6,5 @@ export default defineConfig({
   plugins: [vue()],
   // Base path for GitHub Pages deployment
   // Change 'utm-validator' to match your repository name
-  base: '/utm-validator/',
+  base: '/utm-builder/',
 })
