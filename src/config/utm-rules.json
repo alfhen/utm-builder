@@ -1,699 +1,949 @@
 {
-    "version": 1,
-    "globalRules": {
-      "requiredParams": ["utm_source", "utm_medium", "utm_campaign"],
-      "lowercaseOnly": true,
-      "allowedValuePattern": "^[a-z0-9_]+$",
-      "disallowSpaces": true,
-      "disallowMultipleQuestionMarks": true,
-      "requireAnyUtm": true
+  "version": 1,
+  "globalRules": {
+    "requiredParams": ["utm_source", "utm_medium", "utm_campaign"],
+    "lowercaseOnly": true,
+    "allowedValuePattern": "^[a-z0-9_]+$",
+    "disallowSpaces": true,
+    "disallowMultipleQuestionMarks": true,
+    "requireAnyUtm": true,
+    "utmContentGuidance": {
+      "description": "utm_content should be used to distinguish creatives, CTAs, or placements.",
+      "examples": [
+        "video_1",
+        "story_ad_top",
+        "carousel_3",
+        "cta_shop_now",
+        "header_banner",
+        "footer_cta"
+      ]
     },
-    "channels": [
-      {
-        "id": "facebook_paid",
-        "label": "Facebook Ads (Paid)",
-        "platform": "facebook",
-        "trafficType": "paid",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["facebook"],
-            "preferredValue": "facebook"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["paid_social"],
-            "preferredValue": "paid_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "facebook_organic",
-        "label": "Facebook (Organic)",
-        "platform": "facebook",
-        "trafficType": "organic",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["facebook"],
-            "preferredValue": "facebook"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["organic_social"],
-            "preferredValue": "organic_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "instagram_paid",
-        "label": "Instagram Ads (Paid)",
-        "platform": "instagram",
-        "trafficType": "paid",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["instagram"],
-            "preferredValue": "instagram"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["paid_social"],
-            "preferredValue": "paid_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "instagram_organic",
-        "label": "Instagram (Organic)",
-        "platform": "instagram",
-        "trafficType": "organic",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["instagram"],
-            "preferredValue": "instagram"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["organic_social"],
-            "preferredValue": "organic_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "tiktok_paid",
-        "label": "TikTok Ads (Paid)",
-        "platform": "tiktok",
-        "trafficType": "paid",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["tiktok"],
-            "preferredValue": "tiktok"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["paid_social"],
-            "preferredValue": "paid_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "tiktok_organic",
-        "label": "TikTok (Organic)",
-        "platform": "tiktok",
-        "trafficType": "organic",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["tiktok"],
-            "preferredValue": "tiktok"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["organic_social"],
-            "preferredValue": "organic_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "pinterest_paid",
-        "label": "Pinterest Ads (Paid)",
-        "platform": "pinterest",
-        "trafficType": "paid",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["pinterest"],
-            "preferredValue": "pinterest"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["paid_social"],
-            "preferredValue": "paid_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "pinterest_organic",
-        "label": "Pinterest (Organic)",
-        "platform": "pinterest",
-        "trafficType": "organic",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["pinterest"],
-            "preferredValue": "pinterest"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["organic_social"],
-            "preferredValue": "organic_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "snapchat_paid",
-        "label": "Snapchat Ads (Paid)",
-        "platform": "snapchat",
-        "trafficType": "paid",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["snapchat"],
-            "preferredValue": "snapchat"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["paid_social"],
-            "preferredValue": "paid_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "snapchat_organic",
-        "label": "Snapchat (Organic)",
-        "platform": "snapchat",
-        "trafficType": "organic",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["snapchat"],
-            "preferredValue": "snapchat"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["organic_social"],
-            "preferredValue": "organic_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "youtube_paid",
-        "label": "YouTube Ads (Paid)",
-        "platform": "youtube",
-        "trafficType": "paid",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["youtube"],
-            "preferredValue": "youtube"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["paid_social", "display"],
-            "preferredValue": "paid_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "youtube_organic",
-        "label": "YouTube (Organic)",
-        "platform": "youtube",
-        "trafficType": "organic",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["youtube"],
-            "preferredValue": "youtube"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["organic_social"],
-            "preferredValue": "organic_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "linkedin_paid",
-        "label": "LinkedIn Ads (Paid)",
-        "platform": "linkedin",
-        "trafficType": "paid",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["linkedin"],
-            "preferredValue": "linkedin"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["paid_social"],
-            "preferredValue": "paid_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "linkedin_organic",
-        "label": "LinkedIn (Organic)",
-        "platform": "linkedin",
-        "trafficType": "organic",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["linkedin"],
-            "preferredValue": "linkedin"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["organic_social"],
-            "preferredValue": "organic_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "twitter_paid",
-        "label": "Twitter / X Ads (Paid)",
-        "platform": "twitter",
-        "trafficType": "paid",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["twitter"],
-            "preferredValue": "twitter"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["paid_social"],
-            "preferredValue": "paid_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "twitter_organic",
-        "label": "Twitter / X (Organic)",
-        "platform": "twitter",
-        "trafficType": "organic",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["twitter"],
-            "preferredValue": "twitter"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["organic_social"],
-            "preferredValue": "organic_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "reddit_paid",
-        "label": "Reddit Ads (Paid)",
-        "platform": "reddit",
-        "trafficType": "paid",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["reddit"],
-            "preferredValue": "reddit"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["paid_social"],
-            "preferredValue": "paid_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "reddit_organic",
-        "label": "Reddit (Organic)",
-        "platform": "reddit",
-        "trafficType": "organic",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["reddit"],
-            "preferredValue": "reddit"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["organic_social"],
-            "preferredValue": "organic_social"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "google_search_paid",
-        "label": "Google Search / Shopping (Paid)",
-        "platform": "google",
-        "trafficType": "paid_search",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["google"],
-            "preferredValue": "google"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["cpc"],
-            "preferredValue": "cpc"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false,
-            "allowKeywordMacro": true
-          }
-        }
-      },
-      {
-        "id": "google_display_paid",
-        "label": "Google Display (Paid)",
-        "platform": "google",
-        "trafficType": "display",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["google"],
-            "preferredValue": "google"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["display"],
-            "preferredValue": "display"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "google_search_organic",
-        "label": "Google Search (Organic)",
-        "platform": "google",
-        "trafficType": "organic_search",
-        "disallowUtm": true,
-        "rules": {}
-      },
-      {
-        "id": "bing_search_paid",
-        "label": "Bing / Microsoft Ads (Paid Search)",
-        "platform": "bing",
-        "trafficType": "paid_search",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["bing"],
-            "preferredValue": "bing"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["cpc"],
-            "preferredValue": "cpc"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false,
-            "allowKeywordMacro": true
-          }
-        }
-      },
-      {
-        "id": "email_newsletter",
-        "label": "Email Newsletter",
-        "platform": "email",
-        "trafficType": "email",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["newsletter", "emarsys"],
-            "preferredValue": "newsletter",
-            "warningIfNotPreferred": true
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["email"],
-            "preferredValue": "email"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "influencer",
-        "label": "Influencer (Generic)",
-        "platform": "influencer",
-        "trafficType": "influencer",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": [],
-            "freeTextAllowed": true
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["influencer"],
-            "preferredValue": "influencer"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "affiliate",
-        "label": "Affiliate",
-        "platform": "affiliate",
-        "trafficType": "affiliate",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": ["affiliate"],
-            "preferredValue": "affiliate"
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["affiliate"],
-            "preferredValue": "affiliate"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
-        }
-      },
-      {
-        "id": "referral_partner",
-        "label": "Referral / Partner Site",
-        "platform": "referral",
-        "trafficType": "referral",
-        "rules": {
-          "utm_source": {
-            "required": true,
-            "allowedValues": [],
-            "freeTextAllowed": true
-          },
-          "utm_medium": {
-            "required": true,
-            "allowedValues": ["referral"],
-            "preferredValue": "referral"
-          },
-          "utm_campaign": {
-            "required": true
-          },
-          "utm_content": {
-            "required": false
-          },
-          "utm_term": {
-            "required": false
-          }
+    "utmTermGuidance": {
+      "description": "utm_term should be used for keywords (paid search) or audience/targeting info (paid social).",
+      "examples": [
+        "retarget_7d",
+        "lookalike_1pct",
+        "interests_knitting",
+        "keyword_knitting_yarn"
+      ]
+    }
+  },
+  "channels": [
+    {
+      "id": "facebook_paid",
+      "label": "Facebook Ads (Paid)",
+      "platform": "facebook",
+      "trafficType": "paid",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["facebook"],
+          "preferredValue": "facebook"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["paid_social"],
+          "preferredValue": "paid_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "creative / placement / CTA identifier",
+          "examples": [
+            "video_1",
+            "feed_image",
+            "story_ad",
+            "cta_shop_now"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "suggestedUsage": "audience / targeting identifier",
+          "examples": [
+            "retarget_30d",
+            "lookalike_1pct",
+            "broad_prospecting"
+          ]
         }
       }
-    ]
-  }
+    },
+    {
+      "id": "facebook_organic",
+      "label": "Facebook (Organic)",
+      "platform": "facebook",
+      "trafficType": "organic",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["facebook"],
+          "preferredValue": "facebook"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["organic_social"],
+          "preferredValue": "organic_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "placement or link position",
+          "examples": [
+            "bio_link",
+            "post_caption",
+            "story_link"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional classification, rarely used for organic",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "instagram_paid",
+      "label": "Instagram Ads (Paid)",
+      "platform": "instagram",
+      "trafficType": "paid",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["instagram"],
+          "preferredValue": "instagram"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["paid_social"],
+          "preferredValue": "paid_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "creative / placement / CTA identifier",
+          "examples": [
+            "reel_ad",
+            "story_ad",
+            "feed_image",
+            "cta_shop_now"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "suggestedUsage": "audience / targeting identifier",
+          "examples": [
+            "retarget_30d",
+            "lookalike_1pct",
+            "interests_knitting"
+          ]
+        }
+      }
+    },
+    {
+      "id": "instagram_organic",
+      "label": "Instagram (Organic)",
+      "platform": "instagram",
+      "trafficType": "organic",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["instagram"],
+          "preferredValue": "instagram"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["organic_social"],
+          "preferredValue": "organic_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "placement or link position",
+          "examples": [
+            "bio_link",
+            "story_link",
+            "post_caption"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional classification, rarely used for organic",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "tiktok_paid",
+      "label": "TikTok Ads (Paid)",
+      "platform": "tiktok",
+      "trafficType": "paid",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["tiktok"],
+          "preferredValue": "tiktok"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["paid_social"],
+          "preferredValue": "paid_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "creative / placement / CTA identifier",
+          "examples": [
+            "spark_ad",
+            "video_1",
+            "video_2",
+            "cta_shop_now"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "suggestedUsage": "audience / targeting identifier",
+          "examples": [
+            "retarget_30d",
+            "lookalike_1pct",
+            "broad_prospecting"
+          ]
+        }
+      }
+    },
+    {
+      "id": "tiktok_organic",
+      "label": "TikTok (Organic)",
+      "platform": "tiktok",
+      "trafficType": "organic",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["tiktok"],
+          "preferredValue": "tiktok"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["organic_social"],
+          "preferredValue": "organic_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "placement or link position",
+          "examples": [
+            "bio_link",
+            "video_description"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional classification, rarely used for organic",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "pinterest_paid",
+      "label": "Pinterest Ads (Paid)",
+      "platform": "pinterest",
+      "trafficType": "paid",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["pinterest"],
+          "preferredValue": "pinterest"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["paid_social"],
+          "preferredValue": "paid_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "pin creative / placement",
+          "examples": [
+            "pin_a",
+            "pin_b",
+            "idea_pin"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "suggestedUsage": "audience / targeting identifier",
+          "examples": [
+            "interests_knitting",
+            "retarget_30d"
+          ]
+        }
+      }
+    },
+    {
+      "id": "pinterest_organic",
+      "label": "Pinterest (Organic)",
+      "platform": "pinterest",
+      "trafficType": "organic",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["pinterest"],
+          "preferredValue": "pinterest"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["organic_social"],
+          "preferredValue": "organic_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "pin or board identifier",
+          "examples": [
+            "board_knitting",
+            "pin_inspo"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional classification, rarely used for organic",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "snapchat_paid",
+      "label": "Snapchat Ads (Paid)",
+      "platform": "snapchat",
+      "trafficType": "paid",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["snapchat"],
+          "preferredValue": "snapchat"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["paid_social"],
+          "preferredValue": "paid_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "ad / placement identifier",
+          "examples": [
+            "snap_ad",
+            "story_ad",
+            "collection_ad"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "suggestedUsage": "audience / targeting identifier",
+          "examples": [
+            "retarget_30d",
+            "lookalike_1pct"
+          ]
+        }
+      }
+    },
+    {
+      "id": "snapchat_organic",
+      "label": "Snapchat (Organic)",
+      "platform": "snapchat",
+      "trafficType": "organic",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["snapchat"],
+          "preferredValue": "snapchat"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["organic_social"],
+          "preferredValue": "organic_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "placement or snap type",
+          "examples": [
+            "story_link"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional classification, rarely used for organic",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "youtube_paid",
+      "label": "YouTube Ads (Paid)",
+      "platform": "youtube",
+      "trafficType": "paid",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["youtube"],
+          "preferredValue": "youtube"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["paid_social", "display"],
+          "preferredValue": "paid_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "video creative / placement",
+          "examples": [
+            "instream",
+            "bumper",
+            "discovery"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "suggestedUsage": "audience / targeting identifier",
+          "examples": [
+            "retarget_30d",
+            "affinity_crafters"
+          ]
+        }
+      }
+    },
+    {
+      "id": "youtube_organic",
+      "label": "YouTube (Organic)",
+      "platform": "youtube",
+      "trafficType": "organic",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["youtube"],
+          "preferredValue": "youtube"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["organic_social"],
+          "preferredValue": "organic_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "video or description placement",
+          "examples": [
+            "video_description",
+            "pinned_comment"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional classification, rarely used for organic",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "linkedin_paid",
+      "label": "LinkedIn Ads (Paid)",
+      "platform": "linkedin",
+      "trafficType": "paid",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["linkedin"],
+          "preferredValue": "linkedin"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["paid_social"],
+          "preferredValue": "paid_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "ad format / creative",
+          "examples": [
+            "sponsored_content",
+            "message_ad",
+            "carousel_ad"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "suggestedUsage": "audience / targeting identifier",
+          "examples": [
+            "job_title_marketing",
+            "company_size_smb"
+          ]
+        }
+      }
+    },
+    {
+      "id": "linkedin_organic",
+      "label": "LinkedIn (Organic)",
+      "platform": "linkedin",
+      "trafficType": "organic",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["linkedin"],
+          "preferredValue": "linkedin"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["organic_social"],
+          "preferredValue": "organic_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "post or profile placement",
+          "examples": [
+            "company_post",
+            "personal_profile"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional classification, rarely used for organic",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "twitter_paid",
+      "label": "Twitter / X Ads (Paid)",
+      "platform": "twitter",
+      "trafficType": "paid",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["twitter"],
+          "preferredValue": "twitter"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["paid_social"],
+          "preferredValue": "paid_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "ad / tweet variant",
+          "examples": [
+            "promoted_tweet",
+            "video_ad"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "suggestedUsage": "audience / targeting identifier",
+          "examples": [
+            "keyword_knitting",
+            "interest_crafts"
+          ]
+        }
+      }
+    },
+    {
+      "id": "twitter_organic",
+      "label": "Twitter / X (Organic)",
+      "platform": "twitter",
+      "trafficType": "organic",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["twitter"],
+          "preferredValue": "twitter"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["organic_social"],
+          "preferredValue": "organic_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "tweet or profile placement",
+          "examples": [
+            "profile_link",
+            "tweet_link"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional classification, rarely used for organic",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "reddit_paid",
+      "label": "Reddit Ads (Paid)",
+      "platform": "reddit",
+      "trafficType": "paid",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["reddit"],
+          "preferredValue": "reddit"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["paid_social"],
+          "preferredValue": "paid_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "ad / placement identifier",
+          "examples": [
+            "promoted_post",
+            "sidebar_ad"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "suggestedUsage": "audience / subreddit / targeting identifier",
+          "examples": [
+            "subreddit_knitting",
+            "interest_crafts"
+          ]
+        }
+      }
+    },
+    {
+      "id": "reddit_organic",
+      "label": "Reddit (Organic)",
+      "platform": "reddit",
+      "trafficType": "organic",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["reddit"],
+          "preferredValue": "reddit"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["organic_social"],
+          "preferredValue": "organic_social"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "post or comment link identifier",
+          "examples": [
+            "post_link",
+            "comment_link"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional classification, rarely used for organic",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "google_search_paid",
+      "label": "Google Search / Shopping (Paid)",
+      "platform": "google",
+      "trafficType": "paid_search",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["google"],
+          "preferredValue": "google"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["cpc"],
+          "preferredValue": "cpc"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "ad/asset variant or ad group identifier",
+          "examples": [
+            "rsa_1",
+            "shopping_top",
+            "brand_adgroup"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "allowKeywordMacro": true,
+          "suggestedUsage": "keyword or keyword macro",
+          "examples": [
+            "knitting_yarn",
+            "cheap_wool",
+            "{keyword}"
+          ]
+        }
+      }
+    },
+    {
+      "id": "google_display_paid",
+      "label": "Google Display (Paid)",
+      "platform": "google",
+      "trafficType": "display",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["google"],
+          "preferredValue": "google"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["display"],
+          "preferredValue": "display"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "banner/creative or placement identifier",
+          "examples": [
+            "banner_300x250",
+            "responsive_display_ad"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional targeting info if needed",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "google_search_organic",
+      "label": "Google Search (Organic)",
+      "platform": "google",
+      "trafficType": "organic_search",
+      "disallowUtm": true,
+      "rules": {}
+    },
+    {
+      "id": "bing_search_paid",
+      "label": "Bing / Microsoft Ads (Paid Search)",
+      "platform": "bing",
+      "trafficType": "paid_search",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["bing"],
+          "preferredValue": "bing"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["cpc"],
+          "preferredValue": "cpc"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "ad/asset variant or ad group identifier",
+          "examples": [
+            "rsa_1",
+            "brand_adgroup"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "warnIfMissing": true,
+          "allowKeywordMacro": true,
+          "suggestedUsage": "keyword or keyword macro",
+          "examples": [
+            "knitting_yarn",
+            "{keyword}"
+          ]
+        }
+      }
+    },
+    {
+      "id": "email_newsletter",
+      "label": "Email Newsletter",
+      "platform": "email",
+      "trafficType": "email",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["newsletter", "emarsys"],
+          "preferredValue": "newsletter",
+          "warningIfNotPreferred": true
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["email"],
+          "preferredValue": "email"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "link location or CTA inside the email",
+          "examples": [
+            "header_banner",
+            "cta_button_1",
+            "footer_link"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "usually unused for email; only if extra segmentation is needed",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "influencer",
+      "label": "Influencer (Generic)",
+      "platform": "influencer",
+      "trafficType": "influencer",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": [],
+          "freeTextAllowed": true
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["influencer"],
+          "preferredValue": "influencer"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "specific content/placement for this influencer",
+          "examples": [
+            "story_link",
+            "bio_link"
+          ]
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional audience segment name",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "affiliate",
+      "label": "Affiliate",
+      "platform": "affiliate",
+      "trafficType": "affiliate",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": ["affiliate"],
+          "preferredValue": "affiliate"
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["affiliate"],
+          "preferredValue": "affiliate"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "affiliate sub-placement or creative identifier",
+          "examples": []
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional affiliate-specific segment",
+          "examples": []
+        }
+      }
+    },
+    {
+      "id": "referral_partner",
+      "label": "Referral / Partner Site",
+      "platform": "referral",
+      "trafficType": "referral",
+      "rules": {
+        "utm_source": {
+          "required": true,
+          "allowedValues": [],
+          "freeTextAllowed": true
+        },
+        "utm_medium": {
+          "required": true,
+          "allowedValues": ["referral"],
+          "preferredValue": "referral"
+        },
+        "utm_campaign": {
+          "required": true
+        },
+        "utm_content": {
+          "required": false,
+          "suggestedUsage": "placement or link position on partner site",
+          "examples": []
+        },
+        "utm_term": {
+          "required": false,
+          "suggestedUsage": "optional partner-specific classification",
+          "examples": []
+        }
+      }
+    }
+  ]
+}

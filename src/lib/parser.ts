@@ -49,16 +49,7 @@ export function parseUrl(input: string): ParseResult {
     }
   }
 
-  // Check if any UTM parameters were found
-  const hasUtmParams = Object.keys(params).length > 0;
-  if (!hasUtmParams) {
-    return {
-      success: false,
-      error: 'No UTM parameters found in this URL. UTM parameters should be in the format: ?utm_source=value&utm_medium=value',
-      params: {},
-    };
-  }
-
+  // Return success even with no UTM params - user can add them via the editable table
   return {
     success: true,
     params,

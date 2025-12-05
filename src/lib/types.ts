@@ -7,8 +7,11 @@ export interface ParamRule {
   allowedValues?: string[];
   preferredValue?: string;
   warningIfNotPreferred?: boolean;
+  warnIfMissing?: boolean;
   allowKeywordMacro?: boolean;
   freeTextAllowed?: boolean;
+  suggestedUsage?: string;
+  examples?: string[];
 }
 
 export interface ChannelRules {
@@ -28,6 +31,11 @@ export interface ChannelConfig {
   rules: ChannelRules;
 }
 
+export interface UtmGuidance {
+  description: string;
+  examples: string[];
+}
+
 export interface GlobalRules {
   requiredParams: string[];
   lowercaseOnly: boolean;
@@ -35,6 +43,8 @@ export interface GlobalRules {
   disallowSpaces: boolean;
   disallowMultipleQuestionMarks: boolean;
   requireAnyUtm: boolean;
+  utmContentGuidance?: UtmGuidance;
+  utmTermGuidance?: UtmGuidance;
 }
 
 export interface UtmRulesConfig {
@@ -71,6 +81,7 @@ export type UTMParamKey = (typeof UTM_PARAM_KEYS)[number];
 
 export interface ValidationMessage {
   type: 'error' | 'warning';
+  param?: UTMParamKey;
   message: string;
   suggestion?: string;
 }
@@ -85,6 +96,23 @@ export interface ParseResult {
 export interface ValidationResult {
   isValid: boolean;
   hasWarnings: boolean;
-  messages: ValidationMessage[];
+  errors: ValidationMessage[];
+  warnings: ValidationMessage[];
+  messages: ValidationMessage[]; // Combined for backwards compatibility
   parsedParams: ParsedUTMParams;
+  channelId: string;
+}
+
+// ============================================
+// Tooltip / Guidance Types
+// ============================================
+
+export interface ParamGuidance {
+  suggestedUsage?: string;
+  examples?: string[];
+}
+
+export interface ChannelParamGuidance {
+  utm_content?: ParamGuidance;
+  utm_term?: ParamGuidance;
 }
