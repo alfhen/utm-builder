@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, type ComponentPublicInstance } from 'vue';
 import type { ParsedUTMParams, UTMParamKey } from '../lib/types';
 import { UTM_PARAM_KEYS } from '../lib/types';
 import { getParamGuidance } from '../lib/validator';
@@ -22,8 +22,8 @@ const editValue = ref('');
 const isSaving = ref(false);
 
 // Callback ref to focus input when it's mounted
-function setInputRef(el: HTMLInputElement | null) {
-  if (el) {
+function setInputRef(el: Element | ComponentPublicInstance | null) {
+  if (el && el instanceof HTMLInputElement) {
     // Use setTimeout to ensure DOM is ready
     setTimeout(() => {
       el.focus();

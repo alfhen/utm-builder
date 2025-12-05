@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { ValidationResult, UTMParamKey, ParsedUTMParams } from './lib/types';
+import type { ValidationResult, UTMParamKey } from './lib/types';
 import { parseUrl } from './lib/parser';
 import { validateUtmParams } from './lib/validator';
 import { detectChannel } from './lib/detector';
