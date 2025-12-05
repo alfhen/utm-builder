@@ -59,6 +59,37 @@ function cleanUtmValue(value: string, preserveKeywordMacro = false): string {
 }
 
 /**
+ * Get the default value for a UTM parameter based on channel config
+ */
+function getDefaultValue(param: UTMParamKey, channel: ChannelConfig): string {
+  const rule = channel.rules[param];
+  
+  // If the rule has a preferred value, use it
+  if (rule?.preferredValue) {
+    return rule.preferredValue;
+  }
+  
+  // If the rule has allowed values, use the first one
+  if (rule?.allowedValues && rule.allowedValues.length > 0) {
+    return rule.allowedValues[0]!;
+  }
+  
+  // Default values based on parameter type and channel
+  switch (param) {
+    case 'utm_source':
+      return channel.platform ?? 'source';
+    case 'utm_medium':
+      return channel.trafficType === 'paid' ? 'paid' : 'organic';
+    case 'utm_campaign':
+      return 'campaign_name';
+    case 'utm_content':
+      return 'content';
+    case 'utm_term':
+      return 'term';
+  }
+}
+
+/**
  * Check if a value matches the global allowed pattern
  */
 function isValidUtmValue(value: string, allowKeywordMacro = false): boolean {
@@ -129,11 +160,13 @@ export function validateUtmParams(
   for (const param of globalRules.requiredParams) {
     const value = params[param as keyof ParsedUTMParams];
     if (!value || value.trim() === '') {
+      // Get the default value from channel rules
+      const defaultValue = getDefaultValue(param as UTMParamKey, channel);
       errors.push({
         type: 'error',
         param: param as UTMParamKey,
         message: `Missing required parameter: ${param}`,
-        suggestion: `Add ${param} to your URL`,
+        suggestion: `${param}=${defaultValue}`,
       });
     }
   }
