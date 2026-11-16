@@ -72,37 +72,13 @@ npm run preview
 
 The built files will be in the `dist/` folder.
 
-## Deployment to GitHub Pages
+## Deployment
 
-### Option 1: Automatic Deployment (Recommended)
-
-This project includes a GitHub Actions workflow that automatically deploys to GitHub Pages on every push to the `main` branch.
-
-1. Push this repository to GitHub
-2. Go to your repository **Settings** → **Pages**
-3. Under "Build and deployment", select **GitHub Actions** as the source
-4. Push to `main` branch - the action will build and deploy automatically
-
-Your app will be available at: `https://<username>.github.io/utm-validator/`
-
-### Option 2: Manual Deployment
-
-```bash
-# Build the project
-npm run build
-
-# The dist/ folder can be deployed to any static hosting
-```
-
-### Deploy to utm.alfhen.dev
-
-The site is a static Cloudflare Worker (`wrangler.jsonc`) on the custom domain `utm.alfhen.dev`:
+The site is a static Cloudflare Worker (`wrangler.jsonc`) on the custom domain [utm.alfhen.dev](https://utm.alfhen.dev). Log in with `npx wrangler login`, then:
 
 ```bash
 npm run deploy
 ```
-
-The GitHub Pages workflow still builds a copy at `/utm-builder/` by setting `VITE_BASE`.
 
 ## Tech Stack
 
