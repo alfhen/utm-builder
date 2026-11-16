@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { UTMParamKey, ValidationResult } from '../lib/types';
 import { UTM_PARAM_KEYS } from '../lib/types';
 import { PARAM_META } from '../lib/channels';
@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   fixAll: [];
+  copied: [url: string];
   active: [key: UTMParamKey | null];
 }>();
 
@@ -66,22 +67,38 @@ const copyState = ref<'idle' | 'copied' | 'failed'>('idle');
 let resetTimer: ReturnType<typeof setTimeout> | undefined;
 
 async function copy() {
+  if (!canCopy.value) return;
   try {
     await navigator.clipboard.writeText(props.url);
     copyState.value = 'copied';
+    emit('copied', props.url);
   } catch {
     copyState.value = 'failed';
   }
   clearTimeout(resetTimer);
   resetTimer = setTimeout(() => (copyState.value = 'idle'), 2000);
 }
+
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+    event.preventDefault();
+    copy();
+  }
+}
+
+onMounted(() => window.addEventListener('keydown', onKeydown));
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 </script>
 
 <template>
-  <div class="sticky bottom-0 z-10 -mx-4 px-4 pt-6 pb-4 sm:-mx-6 sm:px-6 bg-gradient-to-t from-bg from-70% to-transparent">
+  <div
+    class="sticky bottom-0 z-10 -mx-4 bg-gradient-to-t from-bg from-70% to-transparent px-4 pt-6 pb-4 sm:-mx-6 sm:px-6 lg:top-0 lg:bottom-auto lg:mx-0 lg:bg-gradient-to-b lg:px-0 lg:pt-6 lg:pb-6"
+  >
     <div class="rounded-xl border border-line bg-panel shadow-[0_8px_30px_-12px_rgb(0_0_0/0.25)]">
       <p
-        class="max-h-36 overflow-y-auto px-4 pt-4 pb-3 font-mono text-[13px] leading-relaxed break-all sm:px-5"
+        class="max-h-36 overflow-y-auto px-4 pt-4 pb-3 font-mono text-[13px] leading-relaxed break-all sm:px-5 lg:max-h-48 lg:min-h-[5.5rem] lg:px-6 lg:pt-5 lg:pb-4 lg:text-[15px]"
         :class="url ? 'text-ink-3' : 'text-ink-3/70 italic font-sans text-sm'"
       >
         <template v-if="url">
@@ -104,7 +121,7 @@ async function copy() {
         <template v-else>https://…</template>
       </p>
 
-      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3 sm:px-5">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3 sm:px-5 lg:px-6">
         <p class="flex items-center gap-2 text-sm font-medium" aria-live="polite">
           <span
             class="size-2 rounded-full"
@@ -119,6 +136,15 @@ async function copy() {
         </p>
 
         <div class="flex items-center gap-2">
+          <a
+            v-if="url && result"
+            :href="url"
+            target="_blank"
+            rel="noopener"
+            class="hidden rounded-lg px-3 py-1.5 text-sm font-medium text-ink-2 hover:bg-field hover:text-ink sm:inline-block"
+          >
+            Open link
+          </a>
           <button
             v-if="fixableCount"
             type="button"
@@ -137,6 +163,7 @@ async function copy() {
               <path d="m3 8.5 3 3 7-7" />
             </svg>
             {{ copyState === 'copied' ? 'Copied' : copyState === 'failed' ? 'Copy failed, select the link' : 'Copy link' }}
+            <kbd class="ml-1 hidden font-sans text-xs font-normal opacity-60 lg:inline">{{ isMac ? '⌘' : 'Ctrl' }}↵</kbd>
           </button>
         </div>
       </div>

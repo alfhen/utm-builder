@@ -30,8 +30,8 @@ function pickPlatform(platform: string) {
     </div>
 
     <div class="space-y-2.5">
-      <div v-for="group in groups" :key="group.label" class="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-4">
-        <span class="w-36 shrink-0 pt-1.5 text-sm text-ink-3">{{ group.label }}</span>
+      <div v-for="group in groups" :key="group.label" class="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-4 lg:flex-col lg:gap-1.5">
+        <span class="w-36 shrink-0 pt-1.5 text-sm text-ink-3 lg:w-auto lg:pt-0">{{ group.label }}</span>
         <div class="flex flex-wrap gap-1.5">
           <button
             v-for="platform in group.platforms"
@@ -52,8 +52,8 @@ function pickPlatform(platform: string) {
       </div>
     </div>
 
-    <div v-if="variants.length > 1" class="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4">
-      <span class="w-36 shrink-0 text-sm text-ink-3">Traffic type</span>
+    <div v-if="variants.length > 1" class="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-4 lg:flex-col lg:items-start lg:gap-1.5">
+      <span class="w-36 shrink-0 text-sm text-ink-3 lg:w-auto">Traffic type</span>
       <div role="radiogroup" aria-label="Traffic type" class="inline-flex w-fit max-w-full flex-wrap rounded-lg border border-line bg-field p-0.5">
         <button
           v-for="variant in variants"

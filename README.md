@@ -58,7 +58,7 @@ npm install
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173/utm-builder/`
+The app will be available at `http://localhost:5173/`
 
 ### Build for Production
 
@@ -94,16 +94,15 @@ npm run build
 # The dist/ folder can be deployed to any static hosting
 ```
 
-### Customizing the Base Path
+### Deploy to utm.alfhen.dev
 
-If your repository has a different name, update the `base` option in `vite.config.ts`:
+The site is a static Cloudflare Worker (`wrangler.jsonc`) on the custom domain `utm.alfhen.dev`:
 
-```ts
-export default defineConfig({
-  base: '/your-repo-name/',
-  plugins: [vue()],
-})
+```bash
+npm run deploy
 ```
+
+The GitHub Pages workflow still builds a copy at `/utm-builder/` by setting `VITE_BASE`.
 
 ## Tech Stack
 
