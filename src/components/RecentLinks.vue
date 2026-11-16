@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useId } from 'vue';
 import type { RecentLink } from '../lib/recent';
 
 defineProps<{
@@ -10,6 +11,7 @@ const emit = defineEmits<{
   clear: [];
 }>();
 
+const headingId = useId();
 const timeFormat = new Intl.RelativeTimeFormat(undefined, { numeric: 'auto' });
 
 function ago(ms: number): string {
@@ -31,9 +33,9 @@ function shortUrl(url: string): string {
 </script>
 
 <template>
-  <section v-if="links.length" aria-labelledby="recent-heading" class="space-y-2">
+  <section v-if="links.length" :aria-labelledby="headingId" class="space-y-2">
     <div class="flex items-baseline justify-between gap-4">
-      <h2 id="recent-heading" class="text-[15px] font-semibold">Recently copied</h2>
+      <h2 :id="headingId" class="text-[15px] font-semibold">Recently copied</h2>
       <button type="button" class="text-sm text-ink-3 hover:text-ink hover:underline underline-offset-2" @click="emit('clear')">
         Clear history
       </button>

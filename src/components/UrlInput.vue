@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { nextTick } from 'vue';
-
 const model = defineModel<string>({ required: true });
 
 withDefaults(
@@ -19,9 +17,9 @@ const emit = defineEmits<{
   clear: [];
 }>();
 
-async function onPaste() {
-  await nextTick();
-  emit('paste');
+function onPaste() {
+  // The paste event fires before the text lands in the field; wait a task, not a microtask.
+  setTimeout(() => emit('paste'), 0);
 }
 </script>
 
@@ -59,7 +57,7 @@ async function onPaste() {
       ]"
       @paste="onPaste"
       @input="emit('input')"
-      @keydown.enter.prevent="emit('submit')"
+      @keydown.enter.exact.prevent="emit('submit')"
     />
 
     <div v-if="hero" class="flex flex-wrap items-center justify-between gap-3 pt-1">

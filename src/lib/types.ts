@@ -102,17 +102,3 @@ export interface ValidationResult {
   parsedParams: ParsedUTMParams;
   channelId: string;
 }
-
-// ============================================
-// Tooltip / Guidance Types
-// ============================================
-
-export interface ParamGuidance {
-  suggestedUsage?: string;
-  examples?: string[];
-}
-
-export interface ChannelParamGuidance {
-  utm_content?: ParamGuidance;
-  utm_term?: ParamGuidance;
-}

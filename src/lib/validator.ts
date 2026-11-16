@@ -31,8 +31,8 @@ export function cleanUtmValue(value: string, preserveKeywordMacro = false): stri
     'ß': 'ss',
   };
 
-  // Temporarily replace {keyword} with a placeholder if we need to preserve it
-  const keywordPlaceholder = '__KEYWORD_MACRO__';
+  // Must survive every cleanup step below unchanged: lowercase letters only.
+  const keywordPlaceholder = 'zzkeywordmacrozz';
   let result = value;
   
   if (preserveKeywordMacro) {
@@ -50,9 +50,8 @@ export function cleanUtmValue(value: string, preserveKeywordMacro = false): stri
   result = result.replace(/_+/g, '_');
   result = result.replace(/^_+|_+$/g, '');
 
-  // Restore {keyword} macro
   if (preserveKeywordMacro) {
-    result = result.replace(new RegExp(keywordPlaceholder, 'g'), '{keyword}');
+    result = result.split(keywordPlaceholder).join('{keyword}');
   }
 
   return result;
@@ -61,6 +60,15 @@ export function cleanUtmValue(value: string, preserveKeywordMacro = false): stri
 function getDefaultValue(param: UTMParamKey, channel: ChannelConfig): string | undefined {
   const rule = channel.rules[param];
   return rule?.preferredValue ?? rule?.allowedValues?.[0];
+}
+
+/** The one-step fix for a badly formatted value: the cleaned value, or the channel's expected value if cleaning alone won't satisfy it. */
+function formatFix(param: UTMParamKey, cleaned: string, rule: ParamRule | undefined): string | undefined {
+  const allowed = rule?.allowedValues;
+  if (allowed?.length && !rule?.freeTextAllowed && !allowed.includes(cleaned)) {
+    return `${param}=${rule?.preferredValue ?? allowed[0]}`;
+  }
+  return cleaned ? `${param}=${cleaned}` : undefined;
 }
 
 /**
@@ -154,28 +162,28 @@ export function validateUtmParams(
 
     const paramRule = channel.rules[param];
     const allowKeywordMacro = paramRule?.allowKeywordMacro || false;
-    const cleanedValue = cleanUtmValue(value, allowKeywordMacro);
+    const fix = formatFix(param, cleanUtmValue(value, allowKeywordMacro), paramRule);
 
     if (globalRules.disallowSpaces && hasSpaces(value)) {
       errors.push({
         type: 'error',
         param,
         message: 'Contains spaces',
-        suggestion: `${param}=${cleanedValue}`,
+        suggestion: fix,
       });
     } else if (globalRules.lowercaseOnly && !isLowercase(value)) {
       errors.push({
         type: 'error',
         param,
         message: 'Must be lowercase',
-        suggestion: `${param}=${cleanedValue}`,
+        suggestion: fix,
       });
     } else if (!isValidUtmValue(value, allowKeywordMacro)) {
       errors.push({
         type: 'error',
         param,
         message: 'Only a–z, 0–9 and underscores are allowed',
-        suggestion: `${param}=${cleanedValue}`,
+        suggestion: fix,
       });
     }
   }
@@ -260,23 +268,4 @@ function validateChannelRules(
       // (Global rules already checked for valid format)
     }
   }
-}
-
-/**
- * Get parameter guidance from channel config
- */
-export function getParamGuidance(
-  channelId: string,
-  param: 'utm_content' | 'utm_term'
-): { suggestedUsage?: string; examples?: string[] } | null {
-  const channel = getChannelById(channelId);
-  if (!channel) return null;
-
-  const rule = channel.rules[param];
-  if (!rule) return null;
-
-  return {
-    suggestedUsage: rule.suggestedUsage,
-    examples: rule.examples,
-  };
 }

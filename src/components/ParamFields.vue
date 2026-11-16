@@ -40,7 +40,7 @@ function chipsFor(key: UTMParamKey): string[] {
 function commit(key: UTMParamKey, event: Event) {
   const raw = (event.target as HTMLInputElement).value;
   const cleaned = cleanUtmValue(raw, !!props.channel?.rules[key]?.allowKeywordMacro);
-  if (cleaned !== raw) emit('update', key, cleaned);
+  if (cleaned !== raw && (cleaned || !raw.trim())) emit('update', key, cleaned);
 }
 </script>
 

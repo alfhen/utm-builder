@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue';
 import type { UTMParamKey, ValidationResult } from './lib/types';
-import { parseUrl } from './lib/parser';
+import { parseUrl, toUrl } from './lib/parser';
 import { validateUtmParams } from './lib/validator';
 import { detectChannel } from './lib/detector';
 import { applyFix, buildCleanUrl, setParam, stripUtmParams } from './lib/fixer';
@@ -46,10 +46,8 @@ function validate(autoDetect: boolean) {
 
   if (autoDetect) {
     const detected = detectChannel(parsed.params);
-    if (detected) {
-      selectedChannelId.value = detected;
-      channelDetected.value = true;
-    }
+    if (detected) selectedChannelId.value = detected;
+    channelDetected.value = !!detected;
   }
 
   result.value = validateUtmParams(parsed.params, selectedChannelId.value);
@@ -57,15 +55,22 @@ function validate(autoDetect: boolean) {
 
 function setStarted(value: boolean) {
   if (started.value === value) return;
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!document.startViewTransition || reduceMotion) {
-    started.value = value;
-    return;
-  }
-  document.startViewTransition(async () => {
+  const wasTyping = document.activeElement?.id === 'url-input';
+
+  // The URL field is a different element in each layout, so focus and caret must be carried over.
+  const swap = async () => {
     started.value = value;
     await nextTick();
-  });
+    const field = document.getElementById('url-input') as HTMLTextAreaElement | null;
+    if (field && (wasTyping || !value)) {
+      field.focus();
+      field.setSelectionRange(field.value.length, field.value.length);
+    }
+  };
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!document.startViewTransition || reduceMotion) swap();
+  else document.startViewTransition(swap);
 }
 
 function startIfValid() {
@@ -74,8 +79,7 @@ function startIfValid() {
 
 function looksComplete(url: string): boolean {
   try {
-    const host = new URL(/^https?:\/\//.test(url) ? url : `https://${url}`).hostname;
-    return /\.[a-z]{2,}$/i.test(host);
+    return /\.[a-z]{2,}$/i.test(toUrl(url).hostname);
   } catch {
     return false;
   }
@@ -90,7 +94,7 @@ function onUrlTyped() {
   }
   parseError.value = null;
   debounce = setTimeout(() => {
-    if (!looksComplete(urlInput.value.trim())) return;
+    if (!looksComplete(urlInput.value)) return;
     validate(true);
     startIfValid();
   }, 900);

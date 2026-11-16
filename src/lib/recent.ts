@@ -7,10 +7,22 @@ export interface RecentLink {
 
 const STORAGE_KEY = 'utm-builder:recent';
 
+function isRecentLink(value: unknown): value is RecentLink {
+  const link = value as RecentLink | null;
+  return (
+    typeof link === 'object' &&
+    link !== null &&
+    typeof link.url === 'string' &&
+    typeof link.channelLabel === 'string' &&
+    typeof link.campaign === 'string' &&
+    Number.isFinite(link.copiedAt)
+  );
+}
+
 export function loadRecentLinks(): RecentLink[] {
   try {
-    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+    return Array.isArray(parsed) ? parsed.filter(isRecentLink) : [];
   } catch {
     return [];
   }
