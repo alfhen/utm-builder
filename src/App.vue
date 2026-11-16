@@ -1,288 +1,289 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import type { ValidationResult, UTMParamKey } from './lib/types';
-import { parseUrl } from './lib/parser';
+import { computed, nextTick, ref } from 'vue';
+import type { UTMParamKey, ValidationResult } from './lib/types';
+import { parseUrl, toUrl } from './lib/parser';
 import { validateUtmParams } from './lib/validator';
 import { detectChannel } from './lib/detector';
-import { applyFix } from './lib/fixer';
-import { getChannels, getChannelById } from './lib/rules';
-import ChannelSelector from './components/ChannelSelector.vue';
+import { applyFix, buildCleanUrl, setParam, stripUtmParams } from './lib/fixer';
+import { getChannelById, getChannels } from './lib/rules';
+import { platformLabel } from './lib/channels';
 import UrlInput from './components/UrlInput.vue';
-import ValidationResults from './components/ValidationResults.vue';
-import TrafficTypeToggle from './components/TrafficTypeToggle.vue';
+import ChannelPicker from './components/ChannelPicker.vue';
+import ParamFields from './components/ParamFields.vue';
+import ResultBar from './components/ResultBar.vue';
+import RecentLinks from './components/RecentLinks.vue';
+import ThemeSwitch from './components/ThemeSwitch.vue';
+import { loadRecentLinks, saveRecentLinks, type RecentLink } from './lib/recent';
 
-// Get first available channel as default
-const defaultChannelId = getChannels().find((c) => !c.disallowUtm)?.id || 'facebook_paid';
+const EXAMPLE_URL =
+  'https://example.com/collections/merino-yarn?ref=nav&utm_source=Facebook&utm_medium=social&utm_campaign=Black Friday 2026';
 
-const selectedChannelId = ref<string>(defaultChannelId);
 const urlInput = ref('');
-const validationResult = ref<ValidationResult | null>(null);
+const selectedChannelId = ref(getChannels().find((c) => !c.disallowUtm)?.id ?? '');
+const channelDetected = ref(false);
+const channelPickedByUser = ref(false);
+const result = ref<ValidationResult | null>(null);
 const parseError = ref<string | null>(null);
-const hasValidated = ref(false);
+const activeParam = ref<UTMParamKey | null>(null);
+const started = ref(false);
 
-// Show channel selector after first validation
-const showChannelSelector = computed(() => hasValidated.value);
+const channel = computed(() => getChannelById(selectedChannelId.value));
+const params = computed(() => result.value?.parsedParams ?? {});
+const cleanUrl = computed(() => (result.value ? buildCleanUrl(urlInput.value, result.value.parsedParams) : ''));
+const hasUtm = computed(() => Object.values(params.value).some(Boolean));
+const generalMessages = computed(() => result.value?.messages.filter((m) => !m.param) ?? []);
 
-// Get current channel's platform and traffic type
-const currentChannel = computed(() => getChannelById(selectedChannelId.value));
-const currentPlatform = computed(() => currentChannel.value?.platform || '');
-const currentTrafficType = computed(() => currentChannel.value?.trafficType || 'paid');
-
-// Check if current platform has both paid and organic options
-const showTrafficToggle = computed(() => {
-  if (!hasValidated.value || !currentPlatform.value) return false;
-
-  const channels = getChannels();
-  const platformChannels = channels.filter((c) => c.platform === currentPlatform.value);
-  const hasPaid = platformChannels.some(
-    (c) => c.trafficType === 'paid' || c.trafficType === 'paid_search'
-  );
-  const hasOrganic = platformChannels.some(
-    (c) => c.trafficType === 'organic' || c.trafficType === 'organic_social' || c.trafficType === 'organic_search'
-  );
-
-  return hasPaid && hasOrganic;
-});
-
-// Debounce timer for input validation
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-
-function handleValidate(autoDetect = true) {
-  validationResult.value = null;
+function validate(autoDetect: boolean) {
+  result.value = null;
   parseError.value = null;
+  if (!urlInput.value.trim()) return;
 
-  if (!urlInput.value.trim()) {
-    hasValidated.value = false;
+  const parsed = parseUrl(urlInput.value);
+  if (!parsed.success || !parsed.params) {
+    parseError.value = parsed.error ?? 'This doesn’t look like a URL.';
     return;
   }
-
-  const parseResult = parseUrl(urlInput.value);
-
-  if (!parseResult.success) {
-    parseError.value = parseResult.error || 'Unknown error parsing URL';
-    hasValidated.value = true;
-    if (parseResult.params) {
-      validationResult.value = {
-        isValid: false,
-        hasWarnings: false,
-        errors: [],
-        warnings: [],
-        messages: [],
-        parsedParams: parseResult.params,
-        channelId: selectedChannelId.value,
-      };
-    }
-    return;
-  }
-
-  let channelToValidate = selectedChannelId.value;
 
   if (autoDetect) {
-    const detectedChannelId = detectChannel(parseResult.params!);
-    if (detectedChannelId) {
-      selectedChannelId.value = detectedChannelId;
-      channelToValidate = detectedChannelId;
+    const detected = detectChannel(parsed.params);
+    if (detected) selectedChannelId.value = detected;
+    channelDetected.value = !!detected;
+  }
+
+  result.value = validateUtmParams(parsed.params, selectedChannelId.value);
+}
+
+function setStarted(value: boolean) {
+  if (started.value === value) return;
+  const wasTyping = document.activeElement?.id === 'url-input';
+
+  // The URL field is a different element in each layout, so focus and caret must be carried over.
+  const swap = async () => {
+    started.value = value;
+    await nextTick();
+    const field = document.getElementById('url-input') as HTMLTextAreaElement | null;
+    if (field && (wasTyping || !value)) {
+      field.focus();
+      field.setSelectionRange(field.value.length, field.value.length);
     }
-  }
+  };
 
-  hasValidated.value = true;
-  validationResult.value = validateUtmParams(parseResult.params!, channelToValidate);
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!document.startViewTransition || reduceMotion) swap();
+  else document.startViewTransition(swap);
 }
 
-function handlePaste() {
-  handleValidate(true);
+function startIfValid() {
+  if (result.value) setStarted(true);
 }
 
-function handleInput() {
-  if (debounceTimer) clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => handleValidate(false), 300);
-}
-
-function handleChannelChange() {
-  if (urlInput.value.trim() && hasValidated.value) {
-    handleValidate(false);
-  }
-}
-
-function handleTrafficTypeChange(isPaid: boolean) {
-  const channels = getChannels();
-  const targetType = isPaid ? 'paid' : 'organic';
-
-  // Find the channel with same platform but different traffic type
-  const newChannel = channels.find(
-    (c) =>
-      c.platform === currentPlatform.value &&
-      (c.trafficType === targetType ||
-        c.trafficType === `${targetType}_search` ||
-        c.trafficType === `${targetType}_social`)
-  );
-
-  if (newChannel) {
-    selectedChannelId.value = newChannel.id;
-    if (urlInput.value.trim() && hasValidated.value) {
-      handleValidate(false);
-    }
-  }
-}
-
-function handleFix(suggestion: string) {
-  const fixedUrl = applyFix(urlInput.value, suggestion);
-  if (fixedUrl !== urlInput.value) {
-    urlInput.value = fixedUrl;
-    handleValidate(false);
-  }
-}
-
-function handleFixAll(suggestions: string[]) {
-  // Use applyAllFixes which only applies error fixes
-  const currentUrl = urlInput.value;
-  let fixedUrl = currentUrl;
-  
-  for (const suggestion of suggestions) {
-    fixedUrl = applyFix(fixedUrl, suggestion);
-  }
-  
-  if (fixedUrl !== currentUrl) {
-    urlInput.value = fixedUrl;
-    handleValidate(false);
-  }
-}
-
-function handleUpdateParam(key: UTMParamKey, value: string) {
-  // Update the URL with the new parameter value
+function looksComplete(url: string): boolean {
   try {
-    const currentUrl = urlInput.value;
-    const urlString = currentUrl.startsWith('http://') || currentUrl.startsWith('https://')
-      ? currentUrl
-      : `https://${currentUrl}`;
-    
-    const url = new URL(urlString);
-    
-    if (value) {
-      url.searchParams.set(key, value);
-    } else {
-      url.searchParams.delete(key);
-    }
-    
-    urlInput.value = url.toString();
-    handleValidate(false);
+    return /\.[a-z]{2,}$/i.test(toUrl(url).hostname);
   } catch {
-    // If URL parsing fails, just apply via the fix mechanism
-    if (value) {
-      handleFix(`${key}=${value}`);
+    return false;
+  }
+}
+
+let debounce: ReturnType<typeof setTimeout> | undefined;
+function onUrlTyped() {
+  clearTimeout(debounce);
+  if (started.value) {
+    debounce = setTimeout(() => validate(!channelPickedByUser.value), 300);
+    return;
+  }
+  parseError.value = null;
+  debounce = setTimeout(() => {
+    if (!looksComplete(urlInput.value)) return;
+    validate(true);
+    startIfValid();
+  }, 900);
+}
+
+function onUrlPasted() {
+  clearTimeout(debounce);
+  channelPickedByUser.value = false;
+  validate(true);
+  startIfValid();
+}
+
+function onUrlSubmitted() {
+  clearTimeout(debounce);
+  validate(!channelPickedByUser.value);
+  startIfValid();
+}
+
+function loadExample() {
+  urlInput.value = EXAMPLE_URL;
+  onUrlPasted();
+}
+
+function clearUrl() {
+  urlInput.value = '';
+  channelDetected.value = false;
+  channelPickedByUser.value = false;
+  validate(false);
+  setStarted(false);
+}
+
+function updateUrl(next: string) {
+  if (next === urlInput.value) return;
+  urlInput.value = next;
+  validate(false);
+}
+
+function pickChannel(id: string) {
+  selectedChannelId.value = id;
+  channelDetected.value = false;
+  channelPickedByUser.value = true;
+
+  const picked = getChannelById(id);
+  let next = urlInput.value;
+  if (picked && !picked.disallowUtm && result.value) {
+    for (const key of ['utm_source', 'utm_medium'] as const) {
+      const rule = picked.rules[key];
+      const current = params.value[key];
+      if (rule?.preferredValue && !(current && rule.allowedValues?.includes(current))) {
+        next = setParam(next, key, rule.preferredValue);
+      }
     }
   }
+  urlInput.value = next;
+  validate(false);
+}
+
+const recent = ref<RecentLink[]>(loadRecentLinks());
+
+function rememberLink(url: string) {
+  const entry: RecentLink = {
+    url,
+    channelLabel: channel.value?.label ?? '',
+    campaign: params.value.utm_campaign ?? '',
+    copiedAt: Date.now(),
+  };
+  recent.value = [entry, ...recent.value.filter((l) => l.url !== url)].slice(0, 8);
+  saveRecentLinks(recent.value);
+}
+
+function loadRecent(url: string) {
+  urlInput.value = url;
+  onUrlPasted();
+  window.scrollTo({ top: 0 });
+}
+
+function clearRecent() {
+  recent.value = [];
+  saveRecentLinks([]);
+}
+
+function fixAll() {
+  const suggestions = result.value?.errors.flatMap((e) => (e.suggestion ? [e.suggestion] : [])) ?? [];
+  updateUrl(suggestions.reduce(applyFix, urlInput.value));
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-900 py-6 px-4 sm:px-6 lg:px-8">
-    <!-- Header -->
-    <header class="text-center mb-6 lg:mb-8">
-      <h1
-        class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-2"
-        style="
-          font-family: 'Syne', sans-serif;
-          background: linear-gradient(135deg, #00d4ff 0%, #c4ff00 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        "
-      >
-        UTM Builder
-      </h1>
-      <p class="text-zinc-400 text-sm sm:text-base max-w-lg mx-auto">
-        Paste your URL, fix issues with one click, and get properly formatted UTM parameters.
-      </p>
-    </header>
+  <ThemeSwitch class="absolute top-4 right-4 z-20" />
 
-    <!-- Main Content - Two Column Layout on Large Screens -->
-    <div class="max-w-7xl mx-auto overflow-hidden">
-      <div class="flex flex-col lg:flex-row lg:items-start gap-6">
-        <!-- Left Panel: Input & Controls -->
-        <div class="w-full lg:w-[380px] lg:flex-shrink-0">
-          <div class="bg-surface-800 rounded-2xl border border-surface-600 p-5 sm:p-6 shadow-2xl lg:sticky lg:top-6 h-full">
-            <div class="space-y-5">
-              <!-- URL Input -->
-              <UrlInput v-model="urlInput" @paste="handlePaste" @input="handleInput" />
-
-              <!-- Channel Selector -->
-              <ChannelSelector
-                v-model="selectedChannelId"
-                :visible="showChannelSelector"
-                @update:model-value="handleChannelChange"
-              />
-
-              <!-- Paid/Organic Toggle -->
-              <Transition
-                enter-active-class="transition duration-200 ease-out"
-                enter-from-class="opacity-0 -translate-y-2"
-                enter-to-class="opacity-100 translate-y-0"
-                leave-active-class="transition duration-150 ease-in"
-                leave-from-class="opacity-100 translate-y-0"
-                leave-to-class="opacity-0 -translate-y-2"
-              >
-                <TrafficTypeToggle
-                  v-if="showTrafficToggle"
-                  :is-paid="currentTrafficType === 'paid' || currentTrafficType === 'paid_search'"
-                  @update:is-paid="handleTrafficTypeChange"
-                />
-              </Transition>
-            </div>
-
-            <!-- Parse Error (in left panel) -->
-            <div
-              v-if="parseError"
-              class="mt-5 p-4 bg-red-500/10 border border-red-500/30 rounded-lg animate-fade-in"
-            >
-              <div class="flex items-start gap-3">
-                <span class="text-lg">❌</span>
-                <p class="text-red-300 text-sm">{{ parseError }}</p>
-              </div>
-            </div>
-
-            <!-- Empty State for Right Panel -->
-            <div v-if="!validationResult && !parseError && hasValidated" class="mt-5 p-4 bg-surface-700/50 rounded-lg text-center">
-              <p class="text-zinc-500 text-sm">Enter a URL to see validation results</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Panel: Validation Results -->
-        <div class="flex-1 min-w-0 overflow-hidden">
-          <Transition
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="opacity-0 translate-y-4 lg:translate-y-0 lg:translate-x-4"
-            enter-to-class="opacity-100 translate-y-0 lg:translate-x-0"
-            leave-active-class="transition duration-200 ease-in"
-            leave-from-class="opacity-100"
-            leave-to-class="opacity-0"
-          >
-            <main v-if="validationResult" class="bg-surface-800 rounded-2xl border border-surface-600 p-5 sm:p-6 shadow-2xl h-full">
-              <ValidationResults
-                :result="validationResult"
-                :original-url="urlInput"
-                @fix="handleFix"
-                @fix-all="handleFixAll"
-                @update-param="handleUpdateParam"
-              />
-            </main>
-          </Transition>
-
-          <!-- Placeholder when no results -->
-          <div v-if="!validationResult && !hasValidated" class="hidden lg:flex items-center justify-center h-64 bg-surface-800/50 rounded-2xl border border-surface-600/50 border-dashed">
-            <div class="text-center">
-              <div class="text-4xl mb-3 opacity-30">🔗</div>
-              <p class="text-zinc-500">Paste a URL to get started</p>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div v-if="!started" class="flex min-h-screen flex-col items-center justify-center px-4 py-16">
+    <div class="w-full max-w-2xl -translate-y-[6vh] space-y-8">
+      <header class="text-center" style="view-transition-name: brand">
+        <h1 class="text-[34px] leading-tight font-semibold tracking-tight sm:text-[44px]">UTM Builder</h1>
+        <p class="mt-2 text-[15px] text-ink-2 sm:text-base">
+          Paste the page you are linking to. You will pick the channel and fill in the tags next.
+        </p>
+      </header>
+      <UrlInput
+        v-model="urlInput"
+        hero
+        :error="parseError"
+        @paste="onUrlPasted"
+        @input="onUrlTyped"
+        @submit="onUrlSubmitted"
+        @example="loadExample"
+      />
+      <RecentLinks :links="recent.slice(0, 4)" class="pt-6" @load="loadRecent" @clear="clearRecent" />
     </div>
+  </div>
 
-    <!-- Footer -->
-    <footer class="mt-8 text-center text-zinc-500 text-sm">
-      <p>Build consistent UTM parameters for your marketing campaigns.</p>
-    </footer>
+  <div
+    v-else
+    class="mx-auto flex min-h-screen max-w-3xl flex-col px-4 sm:px-6 lg:grid lg:max-w-[1360px] lg:grid-cols-[minmax(340px,400px)_1fr] lg:items-start lg:gap-x-14 lg:px-10"
+  >
+    <aside class="space-y-9 lg:pb-14">
+      <header class="pt-16 sm:pt-14" style="view-transition-name: brand">
+        <h1 class="text-[28px] leading-tight font-semibold tracking-tight sm:text-[32px]">UTM Builder</h1>
+        <p class="mt-1.5 max-w-xl text-[15px] text-ink-2">
+          Tag a link for any channel, or paste one that is already tagged to check it against the naming rules.
+        </p>
+      </header>
+
+      <UrlInput
+        v-model="urlInput"
+        :error="parseError"
+        @paste="onUrlPasted"
+        @input="onUrlTyped"
+        @submit="onUrlSubmitted"
+        @clear="clearUrl"
+      />
+
+      <ChannelPicker class="reveal" style="animation-delay: 0.15s" :channel="channel" :detected="channelDetected" @pick="pickChannel" />
+
+      <RecentLinks :links="recent" class="reveal hidden lg:block" style="animation-delay: 0.35s" @load="loadRecent" @clear="clearRecent" />
+    </aside>
+
+    <div class="contents lg:flex lg:flex-col lg:pt-8">
+      <ResultBar
+        :url="cleanUrl"
+        :result="result"
+        :has-parse-error="!!parseError"
+        :active="activeParam"
+        class="reveal order-last mt-10 lg:order-first lg:mt-0"
+        style="animation-delay: 0.1s"
+        @fix-all="fixAll"
+        @copied="rememberLink"
+        @active="(k) => (activeParam = k)"
+      />
+
+      <main class="reveal mt-9 flex-1 space-y-9 lg:mt-4 lg:pb-14" style="animation-delay: 0.25s">
+        <section v-if="channel?.disallowUtm" class="rounded-xl border border-line bg-panel px-5 py-4" aria-live="polite">
+          <h2 class="font-semibold">Leave this link untagged</h2>
+          <p class="mt-1 text-sm text-ink-2">
+            Visits from organic {{ platformLabel(channel.platform) }} search are attributed automatically. UTM tags here
+            would overwrite that and misreport the traffic.
+          </p>
+          <button
+            v-if="hasUtm"
+            type="button"
+            class="mt-3 rounded-lg bg-ink px-3 py-1.5 text-sm font-semibold text-panel hover:opacity-90"
+            @click="updateUrl(stripUtmParams(urlInput))"
+          >
+            Remove UTM parameters
+          </button>
+        </section>
+
+        <template v-else>
+          <p
+            v-for="(msg, i) in generalMessages"
+            :key="i"
+            class="rounded-lg border border-err/40 px-4 py-3 text-sm text-err"
+          >
+            {{ msg.message }}
+          </p>
+          <ParamFields
+            :params="params"
+            :result="result"
+            :channel="channel"
+            :disabled="!result"
+            :active="activeParam"
+            @update="(key, value) => updateUrl(setParam(urlInput, key, value))"
+            @fix="(s) => updateUrl(applyFix(urlInput, s))"
+            @active="(k) => (activeParam = k)"
+          />
+        </template>
+
+        <RecentLinks :links="recent" class="lg:hidden" @load="loadRecent" @clear="clearRecent" />
+      </main>
+    </div>
   </div>
 </template>

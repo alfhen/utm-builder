@@ -17,7 +17,7 @@ import { isLowercase, hasSpaces } from './parser';
  * - Lowercase everything
  * - Preserve {keyword} macro if present
  */
-function cleanUtmValue(value: string, preserveKeywordMacro = false): string {
+export function cleanUtmValue(value: string, preserveKeywordMacro = false): string {
   const transliterations: Record<string, string> = {
     'ø': 'o', 'ö': 'o', 'ô': 'o', 'ò': 'o', 'ó': 'o', 'õ': 'o',
     'å': 'a', 'ä': 'a', 'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a',
@@ -31,8 +31,8 @@ function cleanUtmValue(value: string, preserveKeywordMacro = false): string {
     'ß': 'ss',
   };
 
-  // Temporarily replace {keyword} with a placeholder if we need to preserve it
-  const keywordPlaceholder = '__KEYWORD_MACRO__';
+  // Must survive every cleanup step below unchanged: lowercase letters only.
+  const keywordPlaceholder = 'zzkeywordmacrozz';
   let result = value;
   
   if (preserveKeywordMacro) {
@@ -50,43 +50,25 @@ function cleanUtmValue(value: string, preserveKeywordMacro = false): string {
   result = result.replace(/_+/g, '_');
   result = result.replace(/^_+|_+$/g, '');
 
-  // Restore {keyword} macro
   if (preserveKeywordMacro) {
-    result = result.replace(new RegExp(keywordPlaceholder, 'g'), '{keyword}');
+    result = result.split(keywordPlaceholder).join('{keyword}');
   }
 
   return result;
 }
 
-/**
- * Get the default value for a UTM parameter based on channel config
- */
-function getDefaultValue(param: UTMParamKey, channel: ChannelConfig): string {
+function getDefaultValue(param: UTMParamKey, channel: ChannelConfig): string | undefined {
   const rule = channel.rules[param];
-  
-  // If the rule has a preferred value, use it
-  if (rule?.preferredValue) {
-    return rule.preferredValue;
+  return rule?.preferredValue ?? rule?.allowedValues?.[0];
+}
+
+/** The one-step fix for a badly formatted value: the cleaned value, or the channel's expected value if cleaning alone won't satisfy it. */
+function formatFix(param: UTMParamKey, cleaned: string, rule: ParamRule | undefined): string | undefined {
+  const allowed = rule?.allowedValues;
+  if (allowed?.length && !rule?.freeTextAllowed && !allowed.includes(cleaned)) {
+    return `${param}=${rule?.preferredValue ?? allowed[0]}`;
   }
-  
-  // If the rule has allowed values, use the first one
-  if (rule?.allowedValues && rule.allowedValues.length > 0) {
-    return rule.allowedValues[0]!;
-  }
-  
-  // Default values based on parameter type and channel
-  switch (param) {
-    case 'utm_source':
-      return channel.platform ?? 'source';
-    case 'utm_medium':
-      return channel.trafficType === 'paid' ? 'paid' : 'organic';
-    case 'utm_campaign':
-      return 'campaign_name';
-    case 'utm_content':
-      return 'content';
-    case 'utm_term':
-      return 'term';
-  }
+  return cleaned ? `${param}=${cleaned}` : undefined;
 }
 
 /**
@@ -140,7 +122,7 @@ export function validateUtmParams(
     if (hasAnyUtm) {
       errors.push({
         type: 'error',
-        message: 'This channel does not permit UTM parameters. Remove all UTM parameters for organic search traffic.',
+        message: 'Organic search traffic is attributed automatically. Remove the UTM parameters from this link.',
       });
     }
     return {
@@ -165,8 +147,8 @@ export function validateUtmParams(
       errors.push({
         type: 'error',
         param: param as UTMParamKey,
-        message: `Missing required parameter: ${param}`,
-        suggestion: `${param}=${defaultValue}`,
+        message: 'Required',
+        suggestion: defaultValue ? `${param}=${defaultValue}` : undefined,
       });
     }
   }
@@ -180,28 +162,28 @@ export function validateUtmParams(
 
     const paramRule = channel.rules[param];
     const allowKeywordMacro = paramRule?.allowKeywordMacro || false;
-    const cleanedValue = cleanUtmValue(value, allowKeywordMacro);
+    const fix = formatFix(param, cleanUtmValue(value, allowKeywordMacro), paramRule);
 
     if (globalRules.disallowSpaces && hasSpaces(value)) {
       errors.push({
         type: 'error',
         param,
-        message: `${param} contains spaces: "${value}"`,
-        suggestion: `${param}=${cleanedValue}`,
+        message: 'Contains spaces',
+        suggestion: fix,
       });
     } else if (globalRules.lowercaseOnly && !isLowercase(value)) {
       errors.push({
         type: 'error',
         param,
-        message: `${param} must be lowercase: "${value}"`,
-        suggestion: `${param}=${cleanedValue}`,
+        message: 'Must be lowercase',
+        suggestion: fix,
       });
     } else if (!isValidUtmValue(value, allowKeywordMacro)) {
       errors.push({
         type: 'error',
         param,
-        message: `${param} contains invalid characters. Only a-z, 0-9, and underscores are allowed: "${value}"`,
-        suggestion: `${param}=${cleanedValue}`,
+        message: 'Only a–z, 0–9 and underscores are allowed',
+        suggestion: fix,
       });
     }
   }
@@ -239,16 +221,16 @@ function validateChannelRules(
     if (!rule) continue;
 
     const value = params[param];
+    if (errors.some((e) => e.param === param)) continue;
 
     // Handle missing values
     if (!value || value.trim() === '') {
       // Check for warnIfMissing (soft warning for missing optional params)
       if (rule.warnIfMissing) {
-        const examples = rule.examples?.length ? ` (e.g., ${rule.examples.slice(0, 2).join(', ')})` : '';
         warnings.push({
           type: 'warning',
           param: param as UTMParamKey,
-          message: `${param} is recommended for ${channel.label}${examples}`,
+          message: `Recommended for ${channel.label}`,
         });
       }
       continue;
@@ -268,7 +250,7 @@ function validateChannelRules(
           errors.push({
             type: 'error',
             param: param as UTMParamKey,
-            message: `For ${channel.label}, ${param} must be "${rule.allowedValues.join('" or "')}", got "${value}"`,
+            message: `${channel.label} expects "${rule.allowedValues.join('" or "')}"`,
             suggestion,
           });
         }
@@ -277,7 +259,7 @@ function validateChannelRules(
         warnings.push({
           type: 'warning',
           param: param as UTMParamKey,
-          message: `Using "${value}" as ${param} is acceptable, but "${rule.preferredValue}" is recommended for consistency`,
+          message: `"${value}" works, but "${rule.preferredValue}" is the standard`,
           suggestion: `${param}=${rule.preferredValue}`,
         });
       }
@@ -285,67 +267,5 @@ function validateChannelRules(
       // No allowed values but free text is allowed - any valid lowercase value is fine
       // (Global rules already checked for valid format)
     }
-  }
-}
-
-/**
- * Get parameter guidance from channel config
- */
-export function getParamGuidance(
-  channelId: string,
-  param: 'utm_content' | 'utm_term'
-): { suggestedUsage?: string; examples?: string[] } | null {
-  const channel = getChannelById(channelId);
-  if (!channel) return null;
-
-  const rule = channel.rules[param];
-  if (!rule) return null;
-
-  return {
-    suggestedUsage: rule.suggestedUsage,
-    examples: rule.examples,
-  };
-}
-
-/**
- * Build a clean URL from current URL and params
- */
-export function buildCleanUrl(originalUrl: string, params: ParsedUTMParams): string {
-  try {
-    // Parse the original URL
-    const urlString = originalUrl.startsWith('http://') || originalUrl.startsWith('https://')
-      ? originalUrl
-      : `https://${originalUrl}`;
-    
-    const url = new URL(urlString);
-    
-    // Get all non-UTM params first
-    const nonUtmParams: [string, string][] = [];
-    for (const [key, value] of url.searchParams.entries()) {
-      if (!key.startsWith('utm_')) {
-        nonUtmParams.push([key, value]);
-      }
-    }
-    
-    // Clear and rebuild search params
-    url.search = '';
-    
-    // Add non-UTM params first
-    for (const [key, value] of nonUtmParams) {
-      url.searchParams.set(key, value);
-    }
-    
-    // Add UTM params in standard order
-    const utmOrder = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const;
-    for (const key of utmOrder) {
-      const value = params[key];
-      if (value) {
-        url.searchParams.set(key, value);
-      }
-    }
-    
-    return url.toString();
-  } catch {
-    return originalUrl;
   }
 }

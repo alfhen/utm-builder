@@ -65,16 +65,5 @@ export function detectChannel(params: ParsedUTMParams): string | null {
     }
   }
 
-  // Default to first available channel
-  const defaultChannel = channels.find(c => !c.disallowUtm);
-  return defaultChannel?.id || null;
-}
-
-/**
- * Get the traffic type (paid/organic) from a channel ID
- */
-export function getTrafficType(channelId: string): string {
-  const channels = getChannels();
-  const channel = channels.find(c => c.id === channelId);
-  return channel?.trafficType || 'paid';
+  return null;
 }
