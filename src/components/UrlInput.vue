@@ -1,33 +1,62 @@
 <script setup lang="ts">
-const modelValue = defineModel<string>({ required: true });
-const emit = defineEmits<{
-  paste: []
-  input: []
+import { nextTick } from 'vue';
+
+const model = defineModel<string>({ required: true });
+
+defineProps<{
+  error: string | null;
 }>();
 
-function handlePaste() {
-  // Emit after a tiny delay to ensure v-model has updated
-  setTimeout(() => emit('paste'), 0);
-}
+const emit = defineEmits<{
+  paste: [];
+  input: [];
+  example: [];
+  clear: [];
+}>();
 
-function handleInput() {
-  emit('input');
+async function onPaste() {
+  await nextTick();
+  emit('paste');
 }
 </script>
 
 <template>
-  <div class="space-y-2">
-    <label for="url-input" class="block text-sm font-medium text-zinc-300">
-      Your URL
-    </label>
+  <section class="space-y-2">
+    <div class="flex items-baseline justify-between gap-4">
+      <label for="url-input" class="text-[15px] font-semibold">Destination URL</label>
+      <button
+        v-if="model"
+        type="button"
+        class="text-sm text-ink-3 hover:text-ink underline-offset-2 hover:underline"
+        @click="emit('clear')"
+      >
+        Clear
+      </button>
+      <button
+        v-else
+        type="button"
+        class="text-sm text-ink-3 hover:text-ink underline-offset-2 hover:underline"
+        @click="emit('example')"
+      >
+        Try an example
+      </button>
+    </div>
     <textarea
       id="url-input"
-      v-model="modelValue"
-      @paste="handlePaste"
-      @input="handleInput"
-      rows="3"
-      placeholder="Paste your URL here..."
-      class="w-full px-4 py-3 bg-surface-800 border border-surface-600 rounded-lg text-zinc-100 font-mono text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-accent-cyan focus:border-transparent transition-all resize-y min-h-[80px]"
+      v-model="model"
+      rows="1"
+      spellcheck="false"
+      autocomplete="off"
+      placeholder="Paste a landing page, with or without UTM tags"
+      :aria-invalid="!!error"
+      aria-describedby="url-help"
+      class="block w-full resize-none rounded-lg border bg-panel px-4 py-3 font-mono text-sm leading-relaxed break-all text-ink placeholder:font-sans placeholder:text-[15px] placeholder:text-ink-3 focus:outline-none focus:ring-2 focus:ring-ink/80 [field-sizing:content] min-h-[3.25rem]"
+      :class="error ? 'border-err' : 'border-line'"
+      @paste="onPaste"
+      @input="emit('input')"
     />
-  </div>
+    <p id="url-help" class="text-sm" :class="error ? 'text-err' : 'text-ink-3'" aria-live="polite">
+      {{ error ?? 'Existing UTM tags are read and checked, and the channel is detected for you.' }}
+    </p>
+  </section>
 </template>

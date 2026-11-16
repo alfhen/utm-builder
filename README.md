@@ -6,19 +6,19 @@ Built with Vue 3, TypeScript, Vite, and Tailwind CSS.
 
 ## Features
 
-- **Auto-detect channel** from UTM parameters (Google Ads, Meta, Pinterest, Email)
-- **One-click fixes** - click any suggestion to instantly update the URL
-- **Real-time validation** - validates as you type or paste
-- **Channel-specific rules** for Google Ads, Meta, Pinterest, and Email
-- **Modern, responsive UI** with dark theme
+- **Build or check links**: start from a plain landing page, or paste a tagged link to have it read and checked
+- **Channel picker**: every platform is grouped (social, search, owned & partners), with paid / organic / display variants where they exist; picking one fills in `utm_source` and `utm_medium`
+- **Auto-detect channel** from an existing link's `utm_source` / `utm_medium`
+- **Inline validation**: each parameter shows its own errors and suggestions, with one-click fixes and example values
+- **Link anatomy**: the finished link is colour-coded by parameter, matching the field it came from
+- **Light and dark themes**, following the system setting
 
 ## How It Works
 
-1. **Paste a URL** with UTM parameters
-2. **Channel is auto-detected** from utm_source/utm_medium
-3. **Issues are highlighted** with clickable fix buttons
-4. **Click to fix** - each fix updates the URL instantly
-5. **Copy the fixed URL** when you see "✅ Ready to use"
+1. **Paste a URL** (or press *Try an example*)
+2. **Pick or confirm the channel**
+3. **Fill in or fix the parameters**: values are lowercased and spaces become underscores when you leave a field
+4. **Copy the link** once the status reads *Ready to use*
 
 ## Validation Rules
 
@@ -58,7 +58,7 @@ npm install
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173/utm-validator/`
+The app will be available at `http://localhost:5173/utm-builder/`
 
 ### Build for Production
 
